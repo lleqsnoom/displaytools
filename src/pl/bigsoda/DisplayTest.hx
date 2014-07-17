@@ -1,4 +1,4 @@
-package test;
+package pl.bigsoda ;
 import flash.display.BitmapData;
 import flash.display.GradientType;
 import flash.display.Sprite;
@@ -105,8 +105,10 @@ class DisplayTest extends Sprite
 					redrawGhostRemover();
 				case TestType.MISCONVERGENCE:
 					redrawMisconvergence(true);
+				case TestType.FULLSCREEN:
+					
 				default:
-					redrawMisconvergence(true);
+					//redrawMisconvergence(true);
 			}
 
 			if (_type == TestType.GHOST_REMOVER) {
@@ -140,8 +142,9 @@ class DisplayTest extends Sprite
 	}
 	
 	function set_type(value:String):String 
-	{
-		_type = value;
+	{	
+		if (value != TestType.FULLSCREEN) _type = value;
+		
 		redraw();
 		return _type;
 	}
@@ -320,7 +323,11 @@ class DisplayTest extends Sprite
 	private function redrawReadability():Void 
 	{
 		//graphics.beginBitmapFill(_radability);
-		graphics.drawRect(0, 0, w, h);
+		_bmp = openfl.Assets.getBitmapData("img/displaytools.png");
+
+		graphics.clear();
+		graphics.beginBitmapFill(_bmp);
+		graphics.drawRect(0, 0, w + 256, h + 256);
 		graphics.endFill();
 		
 	}

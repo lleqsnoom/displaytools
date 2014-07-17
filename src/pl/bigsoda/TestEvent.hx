@@ -1,4 +1,4 @@
-package test;
+package pl.bigsoda ;
 import flash.events.Event;
 
 /**

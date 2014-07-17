@@ -5,9 +5,11 @@ import flash.events.MouseEvent;
 import flash.text.TextField;
 import flash.text.TextFormat;
 import flash.ui.Mouse;
-import test.TestEvent;
-import test.TestType;
+import haxe.Timer;
+import pl.bigsoda.TestEvent;
+import pl.bigsoda.TestType;
 import flash.display.StageDisplayState;
+
 
 /**
  * ...
@@ -137,7 +139,7 @@ class Menu extends Sprite
 		}
 		graphics.clear();
 		graphics.beginFill(_bgColor, .95);
-		graphics.drawRect( -1, -1, 122, _buttonsParams.length * 20 + 20);
+		graphics.drawRect( -1, -1, 122, _buttonsParams.length * 20 +1);
 		graphics.endFill();
 		addEventListener(MouseEvent.ROLL_OVER, onMouseOver);
 		addEventListener(MouseEvent.ROLL_OUT, onMouseOut);
@@ -219,11 +221,6 @@ class Menu extends Sprite
 			evt.testType = e.currentTarget.name;
 		#end
 		
-		//untyped __js__("console.log")(e);
-		//trace(e.currentTarget.name);
-		//untyped __js__("console.log")(e.currentTarget);
-		//trace(e.currentTarget);
-		//trace(e.target);
 		dispatchEvent(evt);
 
 
@@ -232,24 +229,25 @@ class Menu extends Sprite
 
 	public function show():Void {
 		visible = true;
-		//if (alpha >= 1) {
+		if (alpha >= 1) {
 			alpha = 1; 
 			Mouse.show();
 			return;
-		//}
-		//alpha += .02;
-		//setTimeout(show, 10);
+		}
+		alpha += .02;
+		Timer.delay(show, 10);
 	}
 
 	public function hide():Void {	
 		if (_mouseOver) return;
-		//if (alpha <= 0) {
+		if (alpha <= 0) {
 			alpha = 0; 
 			visible = false;
 			Mouse.hide();
 			return;
-		//}
-		//alpha -= .02;
+		}
+		alpha -= .02;
+		Timer.delay(hide, 10);
 		//setTimeout(hide, 10);
 	}
 	
