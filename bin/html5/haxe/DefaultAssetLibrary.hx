@@ -48,6 +48,8 @@ class DefaultAssetLibrary extends AssetLibrary {
 		
 		className.set ("img/color_spectrum.png", __ASSET__img_color_spectrum_png);
 		type.set ("img/color_spectrum.png", AssetType.IMAGE);
+		className.set ("img/displaytools.png", __ASSET__img_displaytools_png);
+		type.set ("img/displaytools.png", AssetType.IMAGE);
 		className.set ("img/noise.png", __ASSET__img_noise_png);
 		type.set ("img/noise.png", AssetType.IMAGE);
 		
@@ -56,6 +58,9 @@ class DefaultAssetLibrary extends AssetLibrary {
 		
 		var id;
 		id = "img/color_spectrum.png";
+		path.set (id, id);
+		type.set (id, AssetType.IMAGE);
+		id = "img/displaytools.png";
 		path.set (id, id);
 		type.set (id, AssetType.IMAGE);
 		id = "img/noise.png";
@@ -71,6 +76,9 @@ class DefaultAssetLibrary extends AssetLibrary {
 		
 		className.set ("img/color_spectrum.png", __ASSET__img_color_spectrum_png);
 		type.set ("img/color_spectrum.png", AssetType.IMAGE);
+		
+		className.set ("img/displaytools.png", __ASSET__img_displaytools_png);
+		type.set ("img/displaytools.png", AssetType.IMAGE);
 		
 		className.set ("img/noise.png", __ASSET__img_noise_png);
 		type.set ("img/noise.png", AssetType.IMAGE);
@@ -692,6 +700,7 @@ class DefaultAssetLibrary extends AssetLibrary {
 #elseif flash
 
 @:keep class __ASSET__img_color_spectrum_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
+@:keep class __ASSET__img_displaytools_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
 @:keep class __ASSET__img_noise_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
 
 
@@ -701,10 +710,12 @@ class DefaultAssetLibrary extends AssetLibrary {
 
 
 
+
 #elseif (windows || mac || linux)
 
 
 @:bitmap("assets/img/color_spectrum.png") class __ASSET__img_color_spectrum_png extends flash.display.BitmapData {}
+@:bitmap("assets/img/displaytools.png") class __ASSET__img_displaytools_png extends flash.display.BitmapData {}
 @:bitmap("assets/img/noise.png") class __ASSET__img_noise_png extends flash.display.BitmapData {}
 
 

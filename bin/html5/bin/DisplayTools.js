@@ -32,10 +32,16 @@ ApplicationMain.embed = $hx_exports.openfl.embed = function(elementName,width,he
 	image.src = id;
 	ApplicationMain.total++;
 	var image1 = new Image();
-	id = "img/noise.png";
+	id = "img/displaytools.png";
 	ApplicationMain.images.set(id,image1);
 	image1.onload = ApplicationMain.image_onLoad;
 	image1.src = id;
+	ApplicationMain.total++;
+	var image2 = new Image();
+	id = "img/noise.png";
+	ApplicationMain.images.set(id,image2);
+	image2.onload = ApplicationMain.image_onLoad;
+	image2.src = id;
 	ApplicationMain.total++;
 	if(ApplicationMain.total == 0) ApplicationMain.start(); else {
 		var $it0 = ApplicationMain.urlLoaders.keys();
@@ -90,8 +96,8 @@ ApplicationMain.preloader_onComplete = function(event) {
 	if(hasMain) Reflect.callMethod(Main,Reflect.field(Main,"main"),[]); else {
 		var instance = Type.createInstance(DocumentClass,[]);
 		if(js.Boot.__instanceof(instance,openfl.display.DisplayObject)) openfl.Lib.current.addChild(instance); else {
-			haxe.Log.trace("Error: No entry point found",{ fileName : "ApplicationMain.hx", lineNumber : 202, className : "ApplicationMain", methodName : "preloader_onComplete"});
-			haxe.Log.trace("If you are using DCE with a static main, you may need to @:keep the function",{ fileName : "ApplicationMain.hx", lineNumber : 203, className : "ApplicationMain", methodName : "preloader_onComplete"});
+			haxe.Log.trace("Error: No entry point found",{ fileName : "ApplicationMain.hx", lineNumber : 213, className : "ApplicationMain", methodName : "preloader_onComplete"});
+			haxe.Log.trace("If you are using DCE with a static main, you may need to @:keep the function",{ fileName : "ApplicationMain.hx", lineNumber : 214, className : "ApplicationMain", methodName : "preloader_onComplete"});
 		}
 	}
 };
@@ -1093,6 +1099,9 @@ var DefaultAssetLibrary = function() {
 	id = "img/color_spectrum.png";
 	this.path.set(id,id);
 	this.type.set(id,openfl.AssetType.IMAGE);
+	id = "img/displaytools.png";
+	this.path.set(id,id);
+	this.type.set(id,openfl.AssetType.IMAGE);
 	id = "img/noise.png";
 	this.path.set(id,id);
 	this.type.set(id,openfl.AssetType.IMAGE);
@@ -1308,6 +1317,7 @@ List.prototype = {
 	,__class__: List
 };
 var MainApp = function() {
+	this._timer = new openfl.utils.Timer(3000);
 	openfl.display.Sprite.call(this);
 	this.addEventListener(openfl.events.Event.ADDED_TO_STAGE,$bind(this,this.onAddedToStage));
 };
@@ -1317,13 +1327,25 @@ MainApp.__super__ = openfl.display.Sprite;
 MainApp.prototype = $extend(openfl.display.Sprite.prototype,{
 	onAddedToStage: function(e) {
 		this.removeEventListener(openfl.events.Event.ADDED_TO_STAGE,$bind(this,this.onAddedToStage));
-		this._dt = new test.DisplayTest();
+		this._dt = new pl.bigsoda.DisplayTest();
 		this.addChild(this._dt);
 		this._menu = new Menu();
 		this.addChild(this._menu);
 		this._menu.set_x(10);
 		this._menu.set_y(10);
 		this._menu.addEventListener("onTestMenuClick",$bind(this,this.onTestMenuClick));
+		this._dt.set_type("brightnessContrast");
+		this._timer.addEventListener("timer",$bind(this,this.onTimer));
+		this._timer.start();
+		this.stage.addEventListener(openfl.events.MouseEvent.MOUSE_MOVE,$bind(this,this.onMouseMove));
+	}
+	,onMouseMove: function(e) {
+		this._timer.reset();
+		this._timer.start();
+		this._menu.show();
+	}
+	,onTimer: function(e) {
+		this._menu.hide();
 	}
 	,onTestMenuClick: function(e) {
 		this._dt.set_type(e.testType);
@@ -1352,7 +1374,7 @@ var Menu = function() {
 	}
 	this.get_graphics().clear();
 	this.get_graphics().beginFill(this._bgColor,.95);
-	this.get_graphics().drawRect(-1,-1,122,this._buttonsParams.length * 20 + 20);
+	this.get_graphics().drawRect(-1,-1,122,this._buttonsParams.length * 20 + 1);
 	this.get_graphics().endFill();
 	this.addEventListener(openfl.events.MouseEvent.ROLL_OVER,$bind(this,this.onMouseOver));
 	this.addEventListener(openfl.events.MouseEvent.ROLL_OUT,$bind(this,this.onMouseOut));
@@ -1431,23 +1453,33 @@ Menu.prototype = $extend(openfl.display.Sprite.prototype,{
 		tf.setTextFormat(f);
 	}
 	,onMenuClick: function(e) {
-		var evt = new test.TestEvent("onTestMenuClick");
+		var evt = new pl.bigsoda.TestEvent("onTestMenuClick");
 		evt.testType = e.currentTarget.__name;
 		this.dispatchEvent(evt);
 		if(evt.testType == "fullscreen") this.stage.set_displayState(this.stage.displayState == openfl.display.StageDisplayState.FULL_SCREEN?openfl.display.StageDisplayState.NORMAL:openfl.display.StageDisplayState.FULL_SCREEN);
 	}
 	,show: function() {
 		this.set_visible(true);
-		this.set_alpha(1);
-		openfl.ui.Mouse.show();
-		return;
+		if(this.get_alpha() >= 1) {
+			this.set_alpha(1);
+			openfl.ui.Mouse.show();
+			return;
+		}
+		var _g = this;
+		_g.set_alpha(_g.get_alpha() + .02);
+		haxe.Timer.delay($bind(this,this.show),10);
 	}
 	,hide: function() {
 		if(this._mouseOver) return;
-		this.set_alpha(0);
-		this.set_visible(false);
-		openfl.ui.Mouse.hide();
-		return;
+		if(this.get_alpha() <= 0) {
+			this.set_alpha(0);
+			this.set_visible(false);
+			openfl.ui.Mouse.hide();
+			return;
+		}
+		var _g = this;
+		_g.set_alpha(_g.get_alpha() - .02);
+		haxe.Timer.delay($bind(this,this.hide),10);
 	}
 	,__class__: Menu
 });
@@ -1748,11 +1780,34 @@ haxe.Log.__name__ = ["haxe","Log"];
 haxe.Log.trace = function(v,infos) {
 	js.Boot.__trace(v,infos);
 };
-haxe.Timer = function() { };
+haxe.Timer = function(time_ms) {
+	var me = this;
+	this.id = setInterval(function() {
+		me.run();
+	},time_ms);
+};
 $hxClasses["haxe.Timer"] = haxe.Timer;
 haxe.Timer.__name__ = ["haxe","Timer"];
+haxe.Timer.delay = function(f,time_ms) {
+	var t = new haxe.Timer(time_ms);
+	t.run = function() {
+		t.stop();
+		f();
+	};
+	return t;
+};
 haxe.Timer.stamp = function() {
 	return new Date().getTime() / 1000;
+};
+haxe.Timer.prototype = {
+	stop: function() {
+		if(this.id == null) return;
+		clearInterval(this.id);
+		this.id = null;
+	}
+	,run: function() {
+	}
+	,__class__: haxe.Timer
 };
 haxe.Unserializer = function(buf) {
 	this.buf = buf;
@@ -9420,8 +9475,9 @@ openfl.utils.Timer.prototype = $extend(openfl.events.EventDispatcher.prototype,{
 	,__class__: openfl.utils.Timer
 	,__properties__: {set_repeatCount:"set_repeatCount",set_delay:"set_delay"}
 });
-var test = {};
-test.DisplayTest = function() {
+var pl = {};
+pl.bigsoda = {};
+pl.bigsoda.DisplayTest = function() {
 	this._timer = new openfl.utils.Timer(100);
 	this._type = "";
 	openfl.display.Sprite.call(this);
@@ -9430,10 +9486,10 @@ test.DisplayTest = function() {
 	this._tfPool = new Array();
 	this._timer.addEventListener("timer",$bind(this,this.onTimer));
 };
-$hxClasses["test.DisplayTest"] = test.DisplayTest;
-test.DisplayTest.__name__ = ["test","DisplayTest"];
-test.DisplayTest.__super__ = openfl.display.Sprite;
-test.DisplayTest.prototype = $extend(openfl.display.Sprite.prototype,{
+$hxClasses["pl.bigsoda.DisplayTest"] = pl.bigsoda.DisplayTest;
+pl.bigsoda.DisplayTest.__name__ = ["pl","bigsoda","DisplayTest"];
+pl.bigsoda.DisplayTest.__super__ = openfl.display.Sprite;
+pl.bigsoda.DisplayTest.prototype = $extend(openfl.display.Sprite.prototype,{
 	onAddedToStage: function(e) {
 		this.removeEventListener(openfl.events.Event.ADDED_TO_STAGE,$bind(this,this.onAddedToStage));
 		this.stage.addEventListener(openfl.events.Event.RESIZE,$bind(this,this.redraw));
@@ -9531,8 +9587,9 @@ test.DisplayTest.prototype = $extend(openfl.display.Sprite.prototype,{
 		case "misconvergence":
 			this.redrawMisconvergence(true);
 			break;
+		case "fullscreen":
+			break;
 		default:
-			this.redrawMisconvergence(true);
 		}
 		if(this._type == "ghostRemover") this.startGhostRemover(); else this.stopGhostRemover();
 	}
@@ -9546,7 +9603,7 @@ test.DisplayTest.prototype = $extend(openfl.display.Sprite.prototype,{
 		return this._type;
 	}
 	,set_type: function(value) {
-		this._type = value;
+		if(value != "fullscreen") this._type = value;
 		this.redraw();
 		return this._type;
 	}
@@ -9665,7 +9722,10 @@ test.DisplayTest.prototype = $extend(openfl.display.Sprite.prototype,{
 		this.get_graphics().endFill();
 	}
 	,redrawReadability: function() {
-		this.get_graphics().drawRect(0,0,this.get_w(),this.get_h());
+		this._bmp = openfl.Assets.getBitmapData("img/displaytools.png");
+		this.get_graphics().clear();
+		this.get_graphics().beginBitmapFill(this._bmp);
+		this.get_graphics().drawRect(0,0,this.get_w() + 256,this.get_h() + 256);
 		this.get_graphics().endFill();
 	}
 	,redrawBrightnessContrast: function() {
@@ -9750,29 +9810,29 @@ test.DisplayTest.prototype = $extend(openfl.display.Sprite.prototype,{
 		this._colorSpectrum.set_width(this.get_w());
 		this._colorSpectrum.set_height(this.get_h());
 	}
-	,__class__: test.DisplayTest
+	,__class__: pl.bigsoda.DisplayTest
 	,__properties__: $extend(openfl.display.Sprite.prototype.__properties__,{set_type:"set_type",get_type:"get_type",get_h:"get_h",get_w:"get_w"})
 });
-test.TestEvent = function(type,bubbles,cancelable) {
+pl.bigsoda.TestEvent = function(type,bubbles,cancelable) {
 	if(cancelable == null) cancelable = false;
 	if(bubbles == null) bubbles = false;
 	openfl.events.Event.call(this,type,bubbles,cancelable);
 };
-$hxClasses["test.TestEvent"] = test.TestEvent;
-test.TestEvent.__name__ = ["test","TestEvent"];
-test.TestEvent.__super__ = openfl.events.Event;
-test.TestEvent.prototype = $extend(openfl.events.Event.prototype,{
+$hxClasses["pl.bigsoda.TestEvent"] = pl.bigsoda.TestEvent;
+pl.bigsoda.TestEvent.__name__ = ["pl","bigsoda","TestEvent"];
+pl.bigsoda.TestEvent.__super__ = openfl.events.Event;
+pl.bigsoda.TestEvent.prototype = $extend(openfl.events.Event.prototype,{
 	clone: function() {
-		return new test.TestEvent(this.type,this.bubbles,this.cancelable);
+		return new pl.bigsoda.TestEvent(this.type,this.bubbles,this.cancelable);
 	}
 	,toString: function() {
 		return ["TestEvent","type","bubbles","cancelable","eventPhase"].join(",");
 	}
-	,__class__: test.TestEvent
+	,__class__: pl.bigsoda.TestEvent
 });
-test.TestType = function() { };
-$hxClasses["test.TestType"] = test.TestType;
-test.TestType.__name__ = ["test","TestType"];
+pl.bigsoda.TestType = function() { };
+$hxClasses["pl.bigsoda.TestType"] = pl.bigsoda.TestType;
+pl.bigsoda.TestType.__name__ = ["pl","bigsoda","TestType"];
 var $_, $fid = 0;
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; }
 if(Array.prototype.indexOf) HxOverrides.indexOf = function(a,o,i) {
@@ -10176,30 +10236,30 @@ openfl.ui.Keyboard.DOM_VK_EXECUTE = 43;
 openfl.ui.Keyboard.DOM_VK_SLEEP = 95;
 openfl.utils.Endian.BIG_ENDIAN = "bigEndian";
 openfl.utils.Endian.LITTLE_ENDIAN = "littleEndian";
-test.TestEvent.CLICK = "onTestMenuClick";
-test.TestType.FULLSCREEN = "fullscreen";
-test.TestType.COLOR_SPECTRUM = "colorSpectrum";
-test.TestType.BRIGHTNESS_CONTRAST = "brightnessContrast";
-test.TestType.MISCONVERGENCE = "misconvergence";
-test.TestType.MISCONVERGENCE_BW = "misconvergenceBW";
-test.TestType.MOIRE = "moire";
-test.TestType.MOIRE2 = "moire2";
-test.TestType.MOIRE4 = "moire4";
-test.TestType.READABILITY = "readability";
-test.TestType.SCREEN_COLOR_RED = "screenColorRed";
-test.TestType.SCREEN_COLOR_GREEN = "screenColorGreen";
-test.TestType.SCREEN_COLOR_BLUE = "screenColorBlue";
-test.TestType.SCREEN_COLOR_YELLOW = "screenColorYellow";
-test.TestType.SCREEN_COLOR_MAGENTA = "screenColorMagenta";
-test.TestType.SCREEN_COLOR_CYAN = "screenColorCyan";
-test.TestType.SCREEN_COLOR_WHITE = "screenColorWhite";
-test.TestType.SCREEN_COLOR_BLACK = "screenColorBlack";
-test.TestType.GHOST_REMOVER = "ghostRemover";
-test.TestType.H_LINES_1 = "hLines1";
-test.TestType.H_LINES_2 = "hLines2";
-test.TestType.H_LINES_4 = "hLines4";
-test.TestType.V_LINES_1 = "vLines1";
-test.TestType.V_LINES_2 = "vLines2";
-test.TestType.V_LINES_4 = "vLines4";
+pl.bigsoda.TestEvent.CLICK = "onTestMenuClick";
+pl.bigsoda.TestType.FULLSCREEN = "fullscreen";
+pl.bigsoda.TestType.COLOR_SPECTRUM = "colorSpectrum";
+pl.bigsoda.TestType.BRIGHTNESS_CONTRAST = "brightnessContrast";
+pl.bigsoda.TestType.MISCONVERGENCE = "misconvergence";
+pl.bigsoda.TestType.MISCONVERGENCE_BW = "misconvergenceBW";
+pl.bigsoda.TestType.MOIRE = "moire";
+pl.bigsoda.TestType.MOIRE2 = "moire2";
+pl.bigsoda.TestType.MOIRE4 = "moire4";
+pl.bigsoda.TestType.READABILITY = "readability";
+pl.bigsoda.TestType.SCREEN_COLOR_RED = "screenColorRed";
+pl.bigsoda.TestType.SCREEN_COLOR_GREEN = "screenColorGreen";
+pl.bigsoda.TestType.SCREEN_COLOR_BLUE = "screenColorBlue";
+pl.bigsoda.TestType.SCREEN_COLOR_YELLOW = "screenColorYellow";
+pl.bigsoda.TestType.SCREEN_COLOR_MAGENTA = "screenColorMagenta";
+pl.bigsoda.TestType.SCREEN_COLOR_CYAN = "screenColorCyan";
+pl.bigsoda.TestType.SCREEN_COLOR_WHITE = "screenColorWhite";
+pl.bigsoda.TestType.SCREEN_COLOR_BLACK = "screenColorBlack";
+pl.bigsoda.TestType.GHOST_REMOVER = "ghostRemover";
+pl.bigsoda.TestType.H_LINES_1 = "hLines1";
+pl.bigsoda.TestType.H_LINES_2 = "hLines2";
+pl.bigsoda.TestType.H_LINES_4 = "hLines4";
+pl.bigsoda.TestType.V_LINES_1 = "vLines1";
+pl.bigsoda.TestType.V_LINES_2 = "vLines2";
+pl.bigsoda.TestType.V_LINES_4 = "vLines4";
 ApplicationMain.main();
 })(typeof window != "undefined" ? window : exports);

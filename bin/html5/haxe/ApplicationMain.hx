@@ -81,6 +81,17 @@ import openfl.Lib;
 		
 		
 		var image = new Image ();
+		id = "img/displaytools.png";
+		images.set (id, image);
+		image.onload = image_onLoad;
+		image.src = id;
+		//var loader:Loader = new Loader();
+		//loaders.set("img/displaytools.png", loader);
+		total ++;
+		
+		
+		
+		var image = new Image ();
 		id = "img/noise.png";
 		images.set (id, image);
 		image.onload = image_onLoad;
